@@ -23,11 +23,15 @@ const NOMES_FASE: Record<FaseId, string> = {
 
 const ORDEM: FaseId[] = ["roda-inicial", "jogo-inicial", "especial", "tecnica", "luta", "roda-final"];
 
+export const DURACAO_AULA_MIN = 45;
+
 function fases(minutos: number[]): Fase[] {
+  const total = minutos.reduce((soma, minuto) => soma + minuto, 0);
+  if (minutos.some((minuto) => !Number.isFinite(minuto) || minuto < 0) || total > DURACAO_AULA_MIN) {
+    throw new RangeError(`A grade da aula não pode ultrapassar ${DURACAO_AULA_MIN} minutos.`);
+  }
   return ORDEM.map((id, i) => ({ id, nome: NOMES_FASE[id], minutos: minutos[i] ?? 0 }));
 }
-
-export const DURACAO_AULA_MIN = 45;
 
 export const TURMAS: Record<TurmaId, { nome: string; fases: Fase[] }> = {
   criancas: { nome: "Crianças", fases: fases([2, 6, 5, 16, 14, 2]) },
@@ -77,6 +81,7 @@ export interface Aula {
   ciclo: number;
   degrau: number;
   foco: string;
+  observacao?: string;
   avaliacao?: boolean;
 }
 
@@ -87,8 +92,23 @@ export const AULAS: Aula[] = [
   { data: "12/11", dia: "Qui", ciclo: 2, degrau: 3, foco: "Chegar nas costas e fechar o seatbelt" },
   { data: "17/11", dia: "Ter", ciclo: 2, degrau: 3, foco: "Nas costas: decidir o lado e manter" },
   { data: "19/11", dia: "Qui", ciclo: 2, degrau: 4, foco: "Do seatbelt ao mata-leão" },
-  { data: "24/11", dia: "Ter", ciclo: 3, degrau: 6, foco: "Passar, preparar a entrada e Leg Drag até as costas" },
-  { data: "26/11", dia: "Qui", ciclo: 3, degrau: 7, foco: "Cadeia completa em situação aberta", avaliacao: true },
+  {
+    data: "24/11",
+    dia: "Ter",
+    ciclo: 3,
+    degrau: 6,
+    foco: "Passar, preparar a entrada e Leg Drag até as costas",
+    observacao: "Consolidação, sem tema novo: do degrau 5 (preparar a entrada) ao degrau 6 (sistema de Leg Drag). O degrau 6 é uma etapa da progressão, não tem aula própria.",
+  },
+  {
+    data: "26/11",
+    dia: "Qui",
+    ciclo: 3,
+    degrau: 7,
+    foco: "Cadeia completa em situação aberta",
+    observacao: "Consolidação, sem tema novo: integrar os degraus 5 → 6 → 7 em situação aberta. O degrau 6 é a ponte da sequência, sem aula própria; a avaliação observa a cadeia completa.",
+    avaliacao: true,
+  },
 ];
 
 export const COMPETENCIAS_PADRAO = [

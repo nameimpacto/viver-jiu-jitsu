@@ -61,6 +61,9 @@ function OrganizarPage() {
       </Secao>
 
       <Secao titulo={`Escala · ${aulaAt(pos.aula).data}`}>
+        {aulaAt(pos.aula).observacao && (
+          <p className="placa bg-muted p-3 text-sm font-semibold text-muted-foreground">{aulaAt(pos.aula).observacao}</p>
+        )}
         <ol className="flex flex-col-reverse gap-1.5">
           {DEGRAUS.map((d) => (
             <li key={d.n}>

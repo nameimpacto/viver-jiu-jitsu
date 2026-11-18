@@ -69,7 +69,7 @@ export const JOGOS: Jogo[] = [
   { id: "f5", tipo: "formal", nome: "Luta do Samurai", degraus: [1, 2, 3], publico: ["kids"], objetivo: "Rolar e chegar", regra: "Começa sentado. Costas vale ponto.", placar: true },
   { id: "f6", tipo: "formal", nome: "Rola livre", degraus: [7], publico: ["adult"], objetivo: "Aplicar a cadeia", regra: "Luta livre controlada." },
 
-  // Especial — estrela rosa. Marca um momento: não avança degrau, não é avaliação.
+  // Especial — estrela violeta. Marca um momento: não avança degrau, não é avaliação.
   { id: "e1", tipo: "especial", nome: "Pique-tartaruga", degraus: [], publico: ["kids"], objetivo: "Momento lúdico", regra: "Pego vira tartaruga. Outro passa por cima e salva." },
   { id: "e2", tipo: "especial", nome: "Corrente humana", degraus: [], publico: TODOS, objetivo: "Trabalho em equipe", regra: "De mãos dadas, a corrente pega os soltos." },
   { id: "e3", tipo: "especial", nome: "Estátua do tatame", degraus: [], publico: ["kids"], objetivo: "Autocontrole", regra: "Música para, todos em base. Mexeu, faz 5 polichinelos." },

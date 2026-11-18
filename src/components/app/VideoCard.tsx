@@ -22,8 +22,8 @@ export function VideoCard({ video }: { video: Video }) {
       {video.ressalva && <p className="mt-1 text-sm font-medium text-destructive">{video.ressalva}</p>}
       {!video.youtubeId && !linkFonte && (
         <p className="mt-2 text-sm font-semibold">
-          Só na {nomeFonte}
-          {config.fonteLocal.trim() && ` · ${config.fonteLocal.trim()}`}
+          Vídeo a gravar/buscar — sem vídeo com aprovação pedagógica.
+          {config.fonteLocal.trim() && ` · ${nomeFonte}: ${config.fonteLocal.trim()}`}
         </p>
       )}
       {(video.youtubeId || linkFonte) && (
