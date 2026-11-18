@@ -10,7 +10,7 @@
 
 /*
  * Design: "placa de tatame" — papel quente, tinta quase preta, amarelo de sinalização.
- * Tipos de jogo têm cor própria (verde, azul, âmbar, vermelho, rosa).
+ * Tipos de jogo têm cores semânticas consistentes; Especial usa violeta e mantém a estrela.
  */
 
 @theme inline {
@@ -90,31 +90,31 @@
   --secondary: oklch(0.92 0.016 85);
   --secondary-foreground: oklch(0.21 0.018 260);
   --muted: oklch(0.93 0.014 85);
-  --muted-foreground: oklch(0.47 0.02 260);
+  --muted-foreground: #4C535D;
   --accent: oklch(0.89 0.17 96);
   --accent-foreground: oklch(0.2 0.02 260);
-  --destructive: oklch(0.56 0.22 27);
+  --destructive: #D8151E;
   --destructive-foreground: oklch(0.985 0 0);
   --border: oklch(0.87 0.016 85);
-  --input: oklch(0.85 0.016 85);
+  --input: #8A8378;
   --ring: oklch(0.21 0.018 260);
 
   --signal: oklch(0.89 0.17 96);
   --signal-foreground: oklch(0.2 0.02 260);
-  --youtube: oklch(0.57 0.235 28);
+  --youtube: #E1000D;
   --youtube-foreground: oklch(0.99 0 0);
   --ink: oklch(0.19 0.015 260);
   --ink-foreground: oklch(0.975 0.01 85);
-  --success: oklch(0.6 0.16 150);
+  --success: #0E7A38;
 
-  --tipo-inicial: oklch(0.62 0.17 148);
+  --tipo-inicial: #0E7A38;
   --tipo-analitico: oklch(0.54 0.18 255);
-  --tipo-situacional: oklch(0.78 0.165 72);
-  --tipo-formal: oklch(0.56 0.22 27);
-  --tipo-especial: oklch(0.68 0.2 352);
+  --tipo-situacional: #A36A05;
+  --tipo-formal: #D8151E;
+  --tipo-especial: #8B2FBF;
 
   --atleta-a: oklch(0.54 0.18 255);
-  --atleta-b: oklch(0.56 0.22 27);
+  --atleta-b: #D8151E;
 
   --shadow-placa: 0 1px 0 oklch(0.19 0.015 260 / 0.08), 0 8px 24px -12px oklch(0.19 0.015 260 / 0.25);
 

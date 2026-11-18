@@ -105,6 +105,7 @@ function RelatorioPage() {
       const regs = Object.entries(registros).filter(([k]) => k.endsWith(`|${i}`)).map(([, r]) => r);
       const r = regs.find((x) => x.evidencia || x.ajuste) ?? regs[0];
       const partes = [`${a.data} — ${r?.foco || a.foco}`];
+      if (a.observacao) partes.push(a.observacao);
       if (r?.competencia) partes.push(`Competência: ${r.competencia}`);
       if (r?.evidencia) partes.push(`Evidência: ${r.evidencia}`);
       if (r?.ajuste) partes.push(`Ajuste: ${r.ajuste}`);

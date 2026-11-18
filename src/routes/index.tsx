@@ -54,6 +54,7 @@ function AulaPage() {
         </div>
         <div className="space-y-3 p-4">
           <p className="font-display text-3xl font-bold leading-tight">{registro.foco || aula.foco}</p>
+          {aula.observacao && <p className="rounded-lg bg-muted p-3 text-sm font-semibold text-muted-foreground">{aula.observacao}</p>}
           {aula.avaliacao && <p className="text-sm font-bold uppercase text-destructive">★ Avaliação prática final</p>}
           <div className="no-scrollbar -mx-4 flex gap-2 overflow-x-auto px-4" role="radiogroup" aria-label="Competência do dia">
             {config.competencias.map((c) => (

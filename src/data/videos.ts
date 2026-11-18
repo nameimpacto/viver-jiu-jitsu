@@ -47,8 +47,9 @@ export const VIDEOS_POR_GRUPO: Record<"6-9" | "10-12" | "13-15" | "adultos", str
   "10-12": ["samurai-almiro", "samurai-samuel"],
   "13-15": ["chairsit", "lowhook", "seatbelt"],
   adultos: [
+    "hips", "balled", "samurai-almiro", "samurai-samuel", "chairsit", "lowhook", "seatbelt", "rnc",
     "entry", "cgrip", "toreando", "hq", "throwby", "kneecut", "dblankle", "turtle", "northsouth",
-    "cgripsides", "tireflip", "5050", "ashi", "crabgi", "crabnogi", "finishing", "rnc",
+    "cgripsides", "tireflip", "5050", "ashi", "crabgi", "crabnogi", "finishing",
   ],
 };
 
@@ -65,7 +66,7 @@ export function videosDoGrupo(turma: TurmaId, faixa: FaixaId): Video[] {
  * "Turn Their Hips" e "Balled Up" (degrau 1) em todas as aulas. Agora o
  * vídeo é filtrado pelo degrau da aula E pela faixa. Sem vídeo verificado
  * para faixa + objetivo, nada entra no lugar errado: a tela avisa
- * "vídeo a gravar/buscar". Adultos: lista como antes, sem filtro.
+ * "vídeo a gravar/buscar". Adultos: inventário próprio da turma, sem filtro por degrau.
  */
 export const VIDEO_DEGRAUS: Record<string, number[]> = {
   hips: [1],
