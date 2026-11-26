@@ -4,6 +4,13 @@ import type { Publico, FaixaId, TurmaId } from "./plano";
  * Vídeos. Regra: só IDs verificados pelo professor. Nenhum ID inventado.
  * `fonte: true` = título da Fonte (nome editável na Config). Sem `youtubeId` = só a referência da Fonte.
  */
+export type AprovacaoVideo = "cadastrado" | "pendente" | "aprovado" | "rejeitado";
+
+/**
+ * Aprovação pedagógica do vídeo, decidida pelo professor.
+ * Sem `aprovacao` = "pendente": o vídeo existe no inventário, mas não entra
+ * na aula. Nenhum vídeo é aprovado por código — só o professor aprova.
+ */
 export interface Video {
   id: string;
   titulo: string;
@@ -13,6 +20,20 @@ export interface Video {
   duracao?: string;
   youtubeId?: string;
   ressalva?: string;
+  aprovacao?: AprovacaoVideo;
+}
+
+export function aprovacaoDe(video: Video): AprovacaoVideo {
+  return video.aprovacao ?? "pendente";
+}
+
+export function videoAprovado(video: Video): boolean {
+  return aprovacaoDe(video) === "aprovado";
+}
+
+/** Só vídeos aprovados entram na aula. Sem aprovação, o console fica sem vídeo. */
+export function somenteAprovados(videos: Video[]): Video[] {
+  return videos.filter(videoAprovado);
 }
 
 export const VIDEOS: Video[] = [
@@ -40,22 +61,31 @@ export const VIDEOS: Video[] = [
   { id: "lowhook", titulo: "Low Hook", fonte: false, youtubeId: "UpAR7ArE-vI" },
   { id: "seatbelt", titulo: "Seatbelt", fonte: false, youtubeId: "z9GwS9IgDWk" },
   { id: "rnc", titulo: "Mata-leão", autor: "Kesting e Yip", fonte: false, youtubeId: "KH6qCjgLXJA" },
+  // Aprovados pelo professor em 26/11 para a aula de 26/11 (degrau 7, avaliação):
+  // Caio Terra para 13–15; Chloe para 6–9 e 10–12.
+  { id: "caio-legdrag-costas", titulo: "Leg Drag até as costas — Caio Terra", autor: "Caio Terra", fonte: false, youtubeId: "_VtvkxzfyXE", aprovacao: "aprovado" },
+  { id: "chloe-costas", titulo: "Pegar as costas — Chloe", autor: "Chloe", fonte: true, aprovacao: "aprovado" },
 ];
 
 export const VIDEOS_POR_GRUPO: Record<"6-9" | "10-12" | "13-15" | "adultos", string[]> = {
-  "6-9": ["hips", "balled"],
-  "10-12": ["samurai-almiro", "samurai-samuel"],
-  "13-15": ["chairsit", "lowhook", "seatbelt"],
+  "6-9": ["hips", "balled", "chloe-costas"],
+  "10-12": ["samurai-almiro", "samurai-samuel", "chloe-costas"],
+  "13-15": ["chairsit", "lowhook", "seatbelt", "caio-legdrag-costas"],
   adultos: [
     "hips", "balled", "samurai-almiro", "samurai-samuel", "chairsit", "lowhook", "seatbelt", "rnc",
     "entry", "cgrip", "toreando", "hq", "throwby", "kneecut", "dblankle", "turtle", "northsouth",
     "cgripsides", "tireflip", "5050", "ashi", "crabgi", "crabnogi", "finishing",
+    "caio-legdrag-costas", "chloe-costas",
   ],
 };
 
-export function videosDoGrupo(turma: TurmaId, faixa: FaixaId): Video[] {
+export function videosDoGrupoDe(lista: Video[], turma: TurmaId, faixa: FaixaId): Video[] {
   const key = turma === "adultos" ? "adultos" : faixa;
-  return VIDEOS_POR_GRUPO[key].map((id) => VIDEOS.find((v) => v.id === id)!).filter(Boolean);
+  return VIDEOS_POR_GRUPO[key].map((id) => lista.find((v) => v.id === id)!).filter(Boolean);
+}
+
+export function videosDoGrupo(turma: TurmaId, faixa: FaixaId): Video[] {
+  return videosDoGrupoDe(somenteAprovados(VIDEOS), turma, faixa);
 }
 
 /**
@@ -66,7 +96,10 @@ export function videosDoGrupo(turma: TurmaId, faixa: FaixaId): Video[] {
  * "Turn Their Hips" e "Balled Up" (degrau 1) em todas as aulas. Agora o
  * vídeo é filtrado pelo degrau da aula E pela faixa. Sem vídeo verificado
  * para faixa + objetivo, nada entra no lugar errado: a tela avisa
- * "vídeo a gravar/buscar". Adultos: inventário próprio da turma, sem filtro por degrau.
+ * "vídeo a gravar/buscar". Adultos usam o inventário próprio da turma,
+ * mas também filtrado pelo degrau da aula — sem aprovação, nada entra.
+ * Só vídeos com aprovacao "aprovado" entram; os demais ficam pendentes
+ * até o professor decidir, e a aula funciona sem vídeo.
  */
 export const VIDEO_DEGRAUS: Record<string, number[]> = {
   hips: [1],
@@ -93,6 +126,8 @@ export const VIDEO_DEGRAUS: Record<string, number[]> = {
   lowhook: [3],
   seatbelt: [3, 4],
   rnc: [4],
+  "caio-legdrag-costas": [6, 7],
+  "chloe-costas": [3, 7],
 };
 
 export const VIDEO_FAIXAS: Record<string, ("6-9" | "10-12" | "13-15")[]> = {
@@ -120,15 +155,23 @@ export const VIDEO_FAIXAS: Record<string, ("6-9" | "10-12" | "13-15")[]> = {
   lowhook: ["10-12", "13-15"],
   seatbelt: ["10-12", "13-15"],
   rnc: ["13-15"],
+  "caio-legdrag-costas": ["13-15"],
+  "chloe-costas": ["6-9", "10-12"],
 };
 
-export function videosDaAula(turma: TurmaId, faixa: FaixaId, degrau: number): Video[] {
-  if (turma === "adultos") return videosDoGrupo(turma, faixa);
-  return VIDEOS.filter((v) => {
+export function videosDaAulaDe(lista: Video[], turma: TurmaId, faixa: FaixaId, degrau: number): Video[] {
+  if (turma === "adultos") {
+    return videosDoGrupoDe(lista, turma, faixa).filter((v) => VIDEO_DEGRAUS[v.id]?.includes(degrau));
+  }
+  return lista.filter((v) => {
     const degraus = VIDEO_DEGRAUS[v.id];
     const faixas = VIDEO_FAIXAS[v.id];
     return !!degraus && degraus.includes(degrau) && !!faixas && faixas.includes(faixa);
   });
+}
+
+export function videosDaAula(turma: TurmaId, faixa: FaixaId, degrau: number): Video[] {
+  return videosDaAulaDe(somenteAprovados(VIDEOS), turma, faixa, degrau);
 }
 
 export function youtubeUrl(id: string): string {
