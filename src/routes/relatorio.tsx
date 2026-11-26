@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { FileDown, FileText, ImagePlus, Upload, X } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -48,9 +48,17 @@ export function montarDocumento(st: EstadoRelatorio): Documento {
 
 function RelatorioPage() {
   const [st, setSt] = useRelatorio();
-  const { registros } = useApp();
+  const { registros, pos, encerrarAula } = useApp();
+  const navigate = useNavigate();
   const [ocupado, setOcupado] = useState<"docx" | "pdf" | "foto" | "modelo" | null>(null);
   const usandoModelo = !st.modeloViver;
+  const proximaAula = AULAS[pos.aula + 1];
+
+  const encerrar = () => {
+    encerrarAula();
+    toast.success(proximaAula ? `Aula encerrada. Próxima: ${proximaAula.data}.` : "Aula encerrada.");
+    void navigate({ to: "/" });
+  };
 
   const exportar = async (tipo: "docx" | "pdf") => {
     if (usandoModelo && !st.modelo) {
@@ -188,6 +196,17 @@ function RelatorioPage() {
           </label>
         </div>
       </Secao>
+
+      <div className="mt-6 space-y-2">
+        <Button variant="signal" size="xl" className="w-full" onClick={encerrar}>
+          Encerrar aula e avançar
+        </Button>
+        <p className="text-center text-xs font-semibold text-muted-foreground">
+          {proximaAula
+            ? "Encerrar a aula salva o relatório e avança para a próxima data."
+            : "Última aula da grade — encerrar recomeça do início."}
+        </p>
+      </div>
 
       <div className="mt-6 grid grid-cols-2 gap-2">
         <Button variant="fonte" size="xl" onClick={() => void exportar("docx")} disabled={!!ocupado}>

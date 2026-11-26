@@ -9,7 +9,7 @@ import { Secao } from "@/components/app/Titulo";
 import { VideoCard } from "@/components/app/VideoCard";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { CICLOS, TURMAS, aulaAt, degrauNome, faseAt } from "@/data/plano";
+import { AULAS, CICLOS, TURMAS, aulaAt, degrauNome, faseAt } from "@/data/plano";
 import { videosDaAula } from "@/data/videos";
 import { useApp } from "@/lib/app-state";
 import { degrauDaAula } from "@/lib/plano-aula";
@@ -31,9 +31,10 @@ export const Route = createFileRoute("/")({
 });
 
 function AulaPage() {
-  const { pos, plano, running, iniciarPausar, ajustar, proximaFase, irParaFase, desvios, overrides, config, registro, setRegistro } = useApp();
+  const { pos, plano, running, iniciarPausar, ajustar, proximaFase, irParaFase, encerrarAula, desvios, overrides, config, registro, setRegistro } = useApp();
   const turma = TURMAS[pos.turma];
   const aula = aulaAt(pos.aula);
+  const proximaAula = AULAS[pos.aula + 1];
   const degrau = degrauDaAula(pos.aula, overrides);
   const fase = faseAt(pos.turma, pos.fase);
   const prox = turma.fases[pos.fase + 1];
@@ -103,6 +104,16 @@ function AulaPage() {
 
       {/* O que fazer agora */}
       {faseAgora(item)}
+
+      {/* Encerrar a aula: salva o relatório e avança para a próxima data. */}
+      <div className="placa space-y-1 p-4">
+        <Button variant="signal" size="xl" className="w-full" onClick={encerrarAula}>
+          Encerrar aula
+        </Button>
+        <p className="text-center text-xs font-semibold text-muted-foreground">
+          {proximaAula ? `Avança para ${proximaAula.data} · ${proximaAula.foco}` : "Última aula da grade — recomeça do início."}
+        </p>
+      </div>
 
       {desvios.length > 0 && (
         <Secao titulo="Desvios">

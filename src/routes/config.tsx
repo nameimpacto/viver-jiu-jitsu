@@ -13,9 +13,9 @@ export const Route = createFileRoute("/config")({
   head: () => ({
     meta: [
       { title: "Config — Tatame Viver" },
-      { name: "description", content: "Nome e local da fonte, links da sessão, competências, voz e alarme." },
+      { name: "description", content: "Nome e local da fonte, links salvos no aparelho, competências, voz e alarme." },
       { property: "og:title", content: "Config — Tatame Viver" },
-      { property: "og:description", content: "Nome e local da fonte, links da sessão, competências, voz e alarme." },
+      { property: "og:description", content: "Nome e local da fonte, links salvos no aparelho, competências, voz e alarme." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
@@ -43,7 +43,7 @@ function ConfigPage() {
         </div>
       </Secao>
 
-      <Secao titulo="Links da fonte · só nesta sessão">
+      <Secao titulo="Links da fonte · salvos neste aparelho">
         <div className="placa divide-y divide-border">
           {daFonte.map((v) => {
             const valor = config.fonteLinks[v.id] ?? "";
