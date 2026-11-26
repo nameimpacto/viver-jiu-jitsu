@@ -17,6 +17,16 @@ export interface Posicao {
 
 const CHAVE_POSICAO = "viver.posicao";
 const CHAVE_SESSAO = "viver.sessao";
+/** Config (nome/local da fonte, links, competências, voz e alarme) fica no aparelho, não só na sessão. */
+const CHAVE_CONFIG = "viver.config";
+
+/** Posição depois de encerrar a aula: avança para a próxima data da grade. Na última aula, recomeça a mesma aula da fase inicial. */
+export function encerrarPosicao(p: Posicao): Posicao {
+  const proxima = p.aula + 1;
+  const segundos = faseAt(p.turma, 0).minutos * 60;
+  if (proxima >= AULAS.length) return { ...p, fase: 0, segundos };
+  return { ...p, aula: proxima, fase: 0, segundos };
+}
 
 export function posicaoInicial(): Posicao {
   return { aba: "/", turma: "criancas", faixa: "6-9", aula: 0, fase: 0, segundos: faseAt("criancas", 0).minutos * 60 };
@@ -69,6 +79,8 @@ interface AppCtx {
   ajustar: (delta: number) => void;
   proximaFase: () => void;
   irParaFase: (i: number) => void;
+  /** Encerra a aula atual e avança para a próxima data. Não apaga o relatório. */
+  encerrarAula: () => void;
   desvios: Desvio[];
   config: Config;
   setConfig: (c: Partial<Config>) => void;
@@ -78,6 +90,8 @@ interface AppCtx {
   setRegistro: (r: Partial<Registro>) => void;
   retomada: Posicao | null;
   continuar: () => void;
+  /** Fecha o diálogo e fica na página aberta, sem perder a posição salva. */
+  ficarAqui: () => void;
   comecarDoZero: () => void;
 }
 
@@ -127,6 +141,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const endAtRef = useRef(0);
   const lastTickRef = useRef(0);
   const elapsedMsRef = useRef(0);
+  /** "Ficar nesta página" não pode sobrescrever a posição salva com a inicial. */
+  const pularSalvarRef = useRef(false);
   const configRef = useRef(config);
   configRef.current = config;
 
@@ -134,11 +150,15 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const planoRef = useRef(plano);
   planoRef.current = plano;
 
-  // Abertura: lê sessão (config e registros) e pergunta se continua de onde parou.
+  // Abertura: lê a config salva no aparelho (links da fonte inclusos), os
+  // registros da sessão, e pergunta se continua de onde parou.
   useEffect(() => {
     const sess = lerJSON<SessaoGuardada>(window.sessionStorage, CHAVE_SESSAO);
+    const configSalva = lerJSON<Config>(window.localStorage, CHAVE_CONFIG) ?? sess?.config;
+    if (configSalva) {
+      setConfigState({ ...CONFIG_PADRAO, ...configSalva });
+    }
     if (sess) {
-      setConfigState({ ...CONFIG_PADRAO, ...sess.config });
       setRegistros(sess.registros ?? {});
     }
     const salva = lerJSON<Posicao>(window.localStorage, CHAVE_POSICAO);
@@ -153,12 +173,26 @@ export function AppProvider({ children }: { children: ReactNode }) {
   // Guarda só a posição.
   useEffect(() => {
     if (!pronto) return;
+    if (pularSalvarRef.current) {
+      pularSalvarRef.current = false;
+      return;
+    }
     try {
       window.localStorage.setItem(CHAVE_POSICAO, JSON.stringify({ ...pos, aba: pathname }));
     } catch {
       /* sem armazenamento */
     }
   }, [pos, pathname, pronto]);
+
+  // Guarda a config no aparelho (links da fonte não se perdem ao fechar a aba).
+  useEffect(() => {
+    if (!pronto) return;
+    try {
+      window.localStorage.setItem(CHAVE_CONFIG, JSON.stringify(config));
+    } catch {
+      /* sem armazenamento */
+    }
+  }, [config, pronto]);
 
   useEffect(() => {
     if (!pronto) return;
@@ -259,6 +293,13 @@ export function AppProvider({ children }: { children: ReactNode }) {
     avancar(false);
   }, [avancar]);
 
+  const encerrarAula = useCallback(() => {
+    setRunning(false);
+    elapsedMsRef.current = 0;
+    setDesvios([]);
+    setPos((p) => encerrarPosicao(p));
+  }, []);
+
   const irParaFase = useCallback(
     (i: number) => {
       const p = posRef.current;
@@ -317,6 +358,14 @@ export function AppProvider({ children }: { children: ReactNode }) {
     void navigate({ to: destino as "/" });
   }, [retomada, navigate]);
 
+  const ficarAqui = useCallback(() => {
+    // Fica na página que foi aberta pelo link, sem apagar a posição salva:
+    // a próxima gravação da posição é pulada uma vez.
+    pularSalvarRef.current = true;
+    setRetomada(null);
+    setPronto(true);
+  }, []);
+
   const comecarDoZero = useCallback(() => {
     try {
       window.localStorage.removeItem(CHAVE_POSICAO);
@@ -342,6 +391,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     ajustar,
     proximaFase,
     irParaFase,
+    encerrarAula,
     desvios,
     config,
     setConfig,
@@ -351,6 +401,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setRegistro,
     retomada,
     continuar,
+    ficarAqui,
     comecarDoZero,
   };
 
